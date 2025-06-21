@@ -82,7 +82,7 @@ format_services(GpbModule, Service, OutDir) ->
         {{_, NameAtom}, Methods} = GpbModule:get_service_def(Service),
         rebar_api:debug("eetcd service ~p has methods: ~p", [Service, Methods]),
         Name = atom_to_list(NameAtom),
-        [_, Module] = string:tokens(Name, "."),
+        Module = lists:last(string:tokens(Name, ".")),
 
         [
             {out_dir,                 OutDir},
