@@ -110,7 +110,7 @@ format_methods(Module, FqServiceName, GpbModule, Methods) ->
              {input,                   Input},
              {output,                  Output},
              {input_stream,            InputStream},
-             {out_stream,              OutputStream}
+             {output_stream,              OutputStream}
          ]
      end || Method <- Methods].
 
