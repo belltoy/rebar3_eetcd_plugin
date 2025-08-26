@@ -1,10 +1,13 @@
 {application,rebar3_eetcd_plugin,
              [{description,"Rebar3 plugin to generate client for eetcd"},
-              {vsn,"0.3.2"},
+              {vsn,"0.4.0"},
               {registered,[]},
               {applications,[kernel,stdlib,gpb,providers]},
               {env,[]},
               {modules,[]},
-              {licenses,["Apache 2.0"]},
-              {links,[{"Github",
-                       "https://github.com/zhongwencool/rebar3_eetcd_plugin"}]}]}.
+              {pkg_name, "rebar3_eetcd_plugin_fork"},
+              {licenses,["Apache-2.0"]},
+              {links,[
+                  {"Github", "https://github.com/zhongwencool/rebar3_eetcd_plugin"},
+                  {"Fork", "https://github.com/belltoy/rebar3_eetcd_plugin/releases/tag/v0.4.0-fork"}
+              ]}]}.

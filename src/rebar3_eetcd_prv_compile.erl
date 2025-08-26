@@ -79,21 +79,21 @@ gen_client_module(GpbModule, Options, EtcdConfig, State) ->
 
 format_services(GpbModule, Service, OutDir) ->
     begin
-        {{_, NameAtom}, Methods} = GpbModule:get_service_def(Service),
+        {{_, ServiceNameAtom}, Methods} = GpbModule:get_service_def(Service),
         rebar_api:debug("eetcd service ~p has methods: ~p", [Service, Methods]),
-        Name = atom_to_list(NameAtom),
-        [_, Module] = string:tokens(Name, "."),
+        ServiceName = atom_to_list(ServiceNameAtom),
+        Module = lists:last(string:tokens(ServiceName, ".")),
 
         [
             {out_dir,                 OutDir},
             {pb_module,               atom_to_list(GpbModule)},
-            {unmodified_service_name, Name},
+            {unmodified_service_name, ServiceName},
             {module_name,             list_snake_case(Module)},
-            {methods,                 format_methods(Module, Name, GpbModule, Methods)}
+            {methods,                 format_methods(Module, ServiceName, GpbModule, Methods)}
         ]
     end.
 
-format_methods(Module, _Name, GpbModule, Methods) ->
+format_methods(Module, FqServiceName, GpbModule, Methods) ->
     [begin
         #{input         := Input,
           input_stream  := InputStream,
@@ -105,12 +105,12 @@ format_methods(Module, _Name, GpbModule, Methods) ->
              {method,                  list_snake_case(MethodNameStr)},
              {unmodified_service_name, Module},
              {unmodified_method,       MethodNameStr},
-             {full_service_path,       full_service_path(Module, MethodNameStr)},
+             {full_service_path,       full_service_path(FqServiceName, MethodNameStr)},
              {pb_module,               atom_to_list(GpbModule)},
              {input,                   Input},
              {output,                  Output},
              {input_stream,            InputStream},
-             {out_stream,              OutputStream}
+             {output_stream,              OutputStream}
          ]
      end || Method <- Methods].
 
@@ -129,9 +129,11 @@ list_snake_case(NameString) ->
     string:to_lower(unicode:characters_to_list(Snaked2)).
 
 %% Calculates correct gRPC service path
-full_service_path("Lock", Method)  ->
+full_service_path("Etcd.Lock", Method)  ->
     io_lib:format("/v3lockpb.Lock/~s", [Method]);
-full_service_path("Election", Method)  ->
+full_service_path("Etcd.Election", Method)  ->
     io_lib:format("/v3electionpb.Election/~s", [Method]);
-full_service_path(Service, Method) ->
-    io_lib:format("/etcdserverpb.~s/~s", [Service, Method]).
+full_service_path("Etcd." ++ Service, Method) ->
+    io_lib:format("/etcdserverpb.~s/~s", [Service, Method]);
+full_service_path(FqServiceName, Method) ->
+    io_lib:format("/~s/~s", [FqServiceName, Method]).

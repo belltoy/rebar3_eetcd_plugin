@@ -10,14 +10,20 @@
 -module(eetcd_{{module_name}}_gen).
 
 {{#methods}}
--export([{{method}}/1]).
+-export([{{method}}/{{#input_stream}}1{{/input_stream}}{{^input_stream}}2{{/input_stream}}, {{method}}/{{#input_stream}}2{{/input_stream}}{{^input_stream}}3{{/input_stream}}]).
 {{/methods}}
 
 {{#methods}}
-%% @doc {{^output_stream}}{{^input_stream}}Unary RPC for service at path "{{full_service_path}}" {{/input_stream}}{{#input_stream}}Stream RPC {{/input_stream}}{{/output_stream}}
--spec {{method}}({{#input_stream}}atom()|reference(){{/input_stream}}{{^input_stream}}router_pb:'{{input}}'(){{/input_stream}}) ->
-    {{^output_stream}}{{^input_stream}}{ok, router_pb:'{{output}}'()}{{/input_stream}}{{#input_stream}}{ok, GunPid :: pid(), Http2Ref:: reference()}{{/input_stream}}{{/output_stream}}{{#output_stream}}{{^input_stream}}{ok, GunPid :: pid(), Http2Ref:: reference()}{{/input_stream}}{{#input_stream}}{ok, GunPid :: pid(), Http2Ref:: reference()}{{/input_stream}}{{/output_stream}}|{error,eetcd:eetcd_error()}.
-{{method}}(Request) ->
-    {{^output_stream}}{{^input_stream}}eetcd_stream:unary(Request, '{{input}}', <<"{{full_service_path}}">>, '{{output}}'){{/input_stream}}{{#input_stream}}eetcd_stream:new(Request, <<"{{full_service_path}}">>){{/input_stream}}{{/output_stream}}{{#output_stream}}{{^input_stream}}eetcd_stream:new(Request, <<"{{full_service_path}}">>){{/input_stream}}{{/output_stream}}.
+%% @doc {{^output_stream}}{{^input_stream}}Unary{{/input_stream}}{{#input_stream}}}Client streaming{{/input_stream}}{{/output_stream}}{{#output_stream}}{{^input_stream}}Server streaming{{/input_stream}}{{#input_stream}}Bidirectional streaming{{/input_stream}}{{/output_stream}} RPC for service at path `{{full_service_path}}'
+-spec {{method}}(Client :: eetcd:client(){{^input_stream}}, Request :: {{pb_module}}:'{{input}}'(){{/input_stream}}) ->
+    {{^output_stream}}{{^input_stream}}{ok, {{pb_module}}:'{{output}}'()}{{/input_stream}}{{#input_stream}}{ok, GunPid :: pid(), Http2Ref:: eetcd:stream_ref(), PbModule :: module()}{{/input_stream}}{{/output_stream}}{{#output_stream}}{ok, GunPid :: pid(), Http2Ref:: eetcd:stream_ref(), PbModule :: module()}{{/output_stream}} | {error, eetcd:eetcd_error()}.
+{{method}}(Client{{^input_stream}}, Request{{/input_stream}}) ->
+    {{method}}(Client{{^input_stream}}, Request{{/input_stream}}, []).
+
+%% @doc {{^output_stream}}{{^input_stream}}Unary{{/input_stream}}{{#input_stream}}}Client streaming{{/input_stream}}{{/output_stream}}{{#output_stream}}{{^input_stream}}Server streaming{{/input_stream}}{{#input_stream}}Bidirectional streaming{{/input_stream}}{{/output_stream}} RPC for service at path `{{full_service_path}}'
+-spec {{method}}(Client :: eetcd:client(){{^input_stream}}, Request :: {{pb_module}}:'{{input}}'(){{/input_stream}}, Opts :: eetcd:request_opts()) ->
+    {{^output_stream}}{{^input_stream}}{ok, {{pb_module}}:'{{output}}'()}{{/input_stream}}{{#input_stream}}{ok, GunPid :: pid(), Http2Ref:: eetcd:stream_ref(), PbModule :: module()}{{/input_stream}}{{/output_stream}}{{#output_stream}}{ok, GunPid :: pid(), Http2Ref:: eetcd:stream_ref(), PbModule :: module()}{{/output_stream}} | {error, eetcd:eetcd_error()}.
+{{method}}(Client{{^input_stream}}, Request{{/input_stream}}, Opts) ->
+    {{^output_stream}}{{^input_stream}}eetcd_stream:unary(Client, Request, '{{input}}', <<"{{full_service_path}}">>, '{{output}}', {{pb_module}}, Opts){{/input_stream}}{{#input_stream}}eetcd_stream:client_streaming(Client, <<"{{full_service_path}}">>, {{pb_module}}, Opts){{/input_stream}}{{/output_stream}}{{#output_stream}}{{^input_stream}}eetcd_stream:server_streaming(Client, Request, '{{input}}', <<"{{full_service_path}}">>, {{pb_module}}, Opts){{/input_stream}}{{#input_stream}}eetcd_stream:bidi_streaming(Client, <<"{{full_service_path}}">>, {{pb_module}}, Opts){{/input_stream}}{{/output_stream}}.
 
 {{/methods}}
